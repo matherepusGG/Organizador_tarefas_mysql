@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bloco de Anotações</title>
+<style>
+  :root {
+    --bg:#0b0f17;
+    --text:#e5e7eb;
+    --muted:#9ca3af;
+    --border:rgba(255,255,255,.10);
+    --accent:#7c3aed;
+    --shadow:0 18px 60px rgba(0,0,0,.55);
+    --r:18px;
+  }
+
+  * { box-sizing:border-box; }
+
+  body {
+    margin:0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.35), transparent 60%),
+      var(--bg);
+    color:var(--text);
+  }
+
+  .wrap {
+    max-width:1100px;
+    margin:0 auto;
+    padding:22px;
+  }
+
+  .top {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    padding:14px 0;
+    position:sticky;
+    top:0;
+    background:rgba(11,15,23,.72);
+    backdrop-filter:blur(10px);
+    z-index:10;
+  }
+
+  .brand {
+    font-weight:900;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .dot {
+    width:12px;
+    height:12px;
+    border-radius:999px;
+    background:linear-gradient(135deg,var(--accent),#06b6d4);
+    box-shadow:0 0 0 6px rgba(124,58,237,.15);
+  }
+
+  .search {
+    flex:1;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    background:rgba(17,24,39,.75);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:12px 14px;
+  }
+
+  .search input {
+    width:100%;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--text);
+  }
+
+  .btn {
+    border:1px solid var(--border);
+    background:rgba(17,24,39,.75);
+    color:var(--text);
+    padding:12px 14px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+
+  .btn.primary {
+    background:linear-gradient(135deg, rgba(124,58,237,.95), rgba(99,102,241,.95));
+  }
+
+  .btn.icon {
+    width:44px;
+    height:44px;
+    font-size:22px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .grid {
+    display:grid;
+    grid-template-columns:360px 1fr;
+    gap:16px;
+  }
+
+  .panel {
+    background:rgba(17,24,39,.70);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+
+  .hd {
+    padding:14px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+
+  .list {
+    padding:12px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    max-height:calc(100vh - 160px);
+    overflow:auto;
+  }
+
+  .card {
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:rgba(15,23,42,.55);
+    cursor:pointer;
+    transition:.12s transform;
+  }
+
+  .card:hover {
+    transform:translateY(-1px);
+  }
+
+  .card.active {
+    border-color:rgba(124,58,237,.55);
+    background:rgba(124,58,237,.12);
+  }
+
+  .t {
+    font-weight:900;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:6px;
+  }
+
+  .pill {
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    white-space:nowrap;
+  }
+
+  .s {
+    font-size:12px;
+    color:var(--muted);
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+
+  .viewer {
+    min-height:520px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .empty {
+    padding:44px 16px;
+    text-align:center;
+    color:var(--muted);
+  }
+
+  .meta {
+    padding:14px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .content {
+    padding:14px;
+    line-height:1.45;
+    flex:1;
+    overflow:auto;
+    max-height:calc(100vh - 260px);
+    white-space:normal;
+  }
+
+  .actions {
+    padding:14px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+  }
+
+  .modal-bg {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+    z-index:20;
+  }
+
+  .modal {
+    width:min(760px,100%);
+    background:rgba(17,24,39,.92);
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+  }
+
+  .mbd {
+    padding:14px;
+  }
+
+  .row {
+    display:grid;
+    grid-template-columns:1fr 220px;
+    gap:10px;
+  }
+
+  label {
+    font-size:12px;
+    color:var(--muted);
+    display:block;
+    margin-bottom:6px;
+  }
+
+  input, select, textarea {
+    width:100%;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:rgba(15,23,42,.6);
+    color:var(--text);
+    padding:12px;
+    outline:none;
+  }
+
+  textarea {
+    min-height:260px;
+    resize:vertical;
+  }
+
+  .mft {
+    padding:14px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+  }
+
+  .content strong {
+    font-weight:800;
+  }
+
+  .content em {
+    font-style:italic;
+  }
+
+  .content pre {
+    margin:12px 0;
+    padding:14px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:rgba(2,6,23,.95);
+    overflow:auto;
+    white-space:pre-wrap;
+    word-break:break-word;
+    font-family:Consolas, Monaco, monospace;
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .content code {
+    font-family:Consolas, Monaco, monospace;
+  }
+
+  .content img.note-img {
+    display:block;
+    max-width:100%;
+    height:auto;
+    margin:14px 0;
+    border-radius:14px;
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+  }
+
+  @media (max-width:920px) {
+    .grid { grid-template-columns:1fr; }
+    .row { grid-template-columns:1fr; }
+    .list { max-height:none; }
+    .content { max-height:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>Bloco</span>
+    </div>
+
+    <div class="search">
+      <span style="opacity:.7">🔎</span>
+      <input id="q" placeholder="Pesquisar por palavra-chave...">
+    </div>
+
+    <button class="btn icon primary" id="new">+</button>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="hd">
+        <b>📚 Anotações</b>
+        <span id="count" style="color:var(--muted);font-size:12px"></span>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+
+    <div class="panel viewer" id="viewer">
+      <div class="empty">
+        <div style="font-size:18px;color:var(--text);opacity:.92;margin-bottom:10px">nada aqui, volte depois :)</div>
+        <div>Crie uma anotação no botão <b>+</b>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="mEdit">
+  <div class="modal">
+    <div class="hd">
+      <b id="mTitle">✍️ Nova anotação</b>
+      <button class="btn" id="closeEdit">Fechar</button>
+    </div>
+
+    <div class="mbd">
+      <div class="row">
+        <div>
+          <label>Título</label>
+          <input id="title" placeholder="Ex: JOIN em MySql...">
+        </div>
+
+        <div>
+          <label>Tag</label>
+          <select id="tag">
+            <option>MySql SP</option>
+            <option>MySql VW</option>
+            <option>MySql TRG</option>
+            <option>MySql FUC</option>
+            <option>GERAL</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>Anotação</label>
+        <textarea id="body" placeholder="Digite o que quiser aqui..."></textarea>
+      </div>
+
+      <div style="margin-top:10px;color:var(--muted);font-size:12px">
+        💾 Salvando em <b>notes.json</b> (arquivo físico no PC).
+        <br><br>
+        <b>Formatação disponível:</b><br>
+        **negrito**<br>
+        *itálico*<br>
+        ``bloco de código``<br>
+        ![descrição](C:\pasta\imagem.png)
+      </div>
+    </div>
+
+    <div class="mft">
+      <button class="btn" id="cancelEdit">Cancelar</button>
+      <button class="btn primary" id="saveEdit">Finalizar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="mDone">
+  <div class="modal" style="width:min(520px,100%)">
+    <div class="hd">
+      <b>✅ Concluir</b>
+      <button class="btn" id="closeDone">Fechar</button>
+    </div>
+
+    <div class="mbd" style="color:var(--muted)">
+      O que você quer fazer com essa anotação?
+    </div>
+
+    <div class="mft" style="justify-content:space-between">
+      <button class="btn" id="del" style="border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.12)">Apagar</button>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="txt">Salvar TXT</button>
+        <button class="btn" id="keep" style="border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.12)">Manter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let notes = [];
+let selectedId = null;
+let editingId = null;
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+const list = $("list");
+const viewer = $("viewer");
+const q = $("q");
+const count = $("count");
+
+async function api(url, opt) {
+  const r = await fetch(url, opt);
+
+  if (!r.ok) {
+    const t = await r.text().catch(function () { return ""; });
+    throw new Error(t || "Erro");
+  }
+
+  return r.json();
+}
+
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, function (m) {
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m];
+  });
+}
+
+function renderInline(text) {
+  let html = esc(text || "");
+
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/(^|[\s(>])\*(?!\s)([^*\n]+?)\*(?!\*)/g, "$1<em>$2</em>");
+
+  return html;
+}
+
+function renderBody(raw) {
+  const text = String(raw || "");
+  const parts = [];
+  let lastIndex = 0;
+  const tokenRegex = /!\[(.*?)\]\((.*?)\)|``([\s\S]+?)``/g;
+  let match;
+
+  while ((match = tokenRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({
+        type: "text",
+        value: text.slice(lastIndex, match.index)
+      });
+    }
+
+    if (match[3] !== undefined) {
+      parts.push({
+        type: "code",
+        value: match[3]
+      });
+    } else {
+      parts.push({
+        type: "image",
+        alt: match[1] || "",
+        path: match[2] || ""
+      });
+    }
+
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({
+      type: "text",
+      value: text.slice(lastIndex)
+    });
+  }
+
+  return parts.map(function (part) {
+    if (part.type === "code") {
+      return "<pre><code>" + esc(part.value) + "</code></pre>";
+    }
+
+    if (part.type === "image") {
+      const cleanAlt = esc(part.alt);
+      const cleanPath = encodeURIComponent(part.path.trim());
+      return '<img class="note-img" src="/local-image?path=' + cleanPath + '" alt="' + cleanAlt + '">';
+    }
+
+    return renderInline(part.value).replace(/\n/g, "<br>");
+  }).join("");
+}
+
+async function load() {
+  const query = (q.value || "").trim();
+  const url = query ? "/api/notes?q=" + encodeURIComponent(query) : "/api/notes";
+
+  notes = await api(url);
+  count.textContent = notes.length + " nota(s)";
+
+  if (!notes.find(function (n) { return n.id === selectedId; })) {
+    selectedId = notes[0] ? notes[0].id : null;
+  }
+
+  renderList();
+  renderViewer();
+}
+
+function renderList() {
+  list.innerHTML = "";
+
+  if (notes.length === 0) {
+    list.innerHTML =
+      '<div class="empty">' +
+        '<div style="font-size:18px;color:var(--text);opacity:.92;margin-bottom:10px">nada aqui, volte depois :)</div>' +
+        '<div>Crie a primeira no botão <b>+</b>.</div>' +
+      '</div>';
+    return;
+  }
+
+  for (let i = 0; i < notes.length; i++) {
+    const n = notes[i];
+    const div = document.createElement("div");
+
+    div.className = "card" + (n.id === selectedId ? " active" : "");
+    div.innerHTML =
+      '<div class="t">' +
+        '<span>' + esc(n.title) + '</span>' +
+        '<span class="pill">' + esc(n.tag) + '</span>' +
+      '</div>' +
+      '<div class="s">' + esc(n.body).slice(0, 220) + '</div>';
+
+    div.onclick = function () {
+      selectedId = n.id;
+      renderList();
+      renderViewer();
+    };
+
+    list.appendChild(div);
+  }
+}
+
+function renderViewer() {
+  const note = notes.find(function (n) {
+    return n.id === selectedId;
+  });
+
+  if (!note) {
+    viewer.innerHTML =
+      '<div class="empty">' +
+        '<div style="font-size:18px;color:var(--text);opacity:.92;margin-bottom:10px">nada aqui, volte depois :)</div>' +
+        '<div>Crie uma anotação no botão <b>+</b>.</div>' +
+      '</div>';
+    return;
+  }
+
+  viewer.innerHTML =
+    '<div class="meta">' +
+      '<div>' +
+        '<div style="font-weight:900;font-size:18px">' + esc(note.title) + '</div>' +
+        '<div style="margin-top:6px;color:var(--muted);font-size:12px;display:flex;gap:10px;flex-wrap:wrap">' +
+          '<span class="pill">' + esc(note.tag) + '</span>' +
+          '<span>🕒 Atualizado: ' + new Date(note.updatedAt).toLocaleString("pt-BR") + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="content">' + renderBody(note.body) + '</div>' +
+    '<div class="actions">' +
+      '<button class="btn" id="done">Concluir</button>' +
+      '<button class="btn primary" id="edit">Editar</button>' +
+    '</div>';
+
+  $("edit").onclick = function () { openEdit(note); };
+  $("done").onclick = function () { openDone(); };
+}
+
+function openEdit(note) {
+  editingId = note ? note.id : null;
+  $("mTitle").textContent = note ? "✍️ Editar anotação" : "✍️ Nova anotação";
+  $("title").value = note ? note.title : "";
+  $("tag").value = note ? note.tag : "GERAL";
+  $("body").value = note ? note.body : "";
+  $("mEdit").style.display = "flex";
+
+  setTimeout(function () {
+    $("title").focus();
+  }, 0);
+}
+
+function closeEdit() {
+  $("mEdit").style.display = "none";
+  editingId = null;
+}
+
+async function saveEdit() {
+  const title = $("title").value.trim();
+  const tag = $("tag").value;
+  const body = $("body").value;
+
+  if (!title) {
+    alert("Coloca um título. Sem título vira bagunça.");
+    return;
+  }
+
+  if (editingId) {
+    await api("/api/notes/" + encodeURIComponent(editingId), {
+      method: "PUT",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ title: title, tag: tag, body: body })
+    });
+  } else {
+    const created = await api("/api/notes", {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ title: title, tag: tag, body: body })
+    });
+
+    selectedId = created.id;
+  }
+
+  closeEdit();
+  await load();
+}
+
+function openDone() {
+  $("mDone").style.display = "flex";
+}
+
+function closeDone() {
+  $("mDone").style.display = "none";
+}
+
+async function del() {
+  const note = notes.find(function (n) {
+    return n.id === selectedId;
+  });
+
+  if (!note) return;
+  if (!confirm('Apagar "' + note.title + '"?')) return;
+
+  await api("/api/notes/" + encodeURIComponent(selectedId), {
+    method:"DELETE"
+  });
+
+  closeDone();
+  selectedId = null;
+  await load();
+}
+
+function saveTxt() {
+  const note = notes.find(function (n) {
+    return n.id === selectedId;
+  });
+
+  if (!note) return;
+
+  const safe = note.title.replace(/[\\/:*?"<>|]+/g, "-").trim() || "anotacao";
+  const txt =
+    "Título: " + note.title + "\n" +
+    "Tag: " + note.tag + "\n" +
+    "Criado: " + new Date(note.createdAt).toLocaleString("pt-BR") + "\n" +
+    "Atualizado: " + new Date(note.updatedAt).toLocaleString("pt-BR") + "\n\n" +
+    "========================\n" +
+    note.body + "\n";
+
+  const blob = new Blob([txt], { type:"text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = safe + ".txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(function () {
+    URL.revokeObjectURL(url);
+  }, 500);
+}
+
+$("new").onclick = function () { openEdit(null); };
+$("closeEdit").onclick = closeEdit;
+$("cancelEdit").onclick = closeEdit;
+$("saveEdit").onclick = saveEdit;
+
+$("closeDone").onclick = closeDone;
+$("keep").onclick = closeDone;
+$("del").onclick = del;
+$("txt").onclick = saveTxt;
+
+q.oninput = function () {
+  load();
+};
+
+$("mEdit").onclick = function (e) {
+  if (e.target === $("mEdit")) closeEdit();
+};
+
+$("mDone").onclick = function (e) {
+  if (e.target === $("mDone")) closeDone();
+};
+
+load();
+</script>
+</body>
+</html>
